@@ -215,9 +215,7 @@ exports.testCmd = (rl, id) => {
    log(` [${colorize(id,'magenta')}]: ${quiz.question}`);
      return makeQuestion(rl,'Introduzca la respuesta: ')
         .then(a => {
-            resp=quiz.answer.toLowerCase();
-
-    if(a.toLowerCase().trim() === resp ){
+    if(a.toLowerCase().trim() === quiz.answer.toLowerCase()){
       log("Su respuesta es correcta.");
       log("Correcta","green");
 
@@ -256,7 +254,7 @@ const playOne = () => {
             log('No hay nada más que preguntar.');
             log(`Fin del juego. Aciertos: ${score}`);
             log(`${score}`, 'magenta');
-            return;
+            rl.prompt();
         }
 
         toBeResolved.splice(rnd, 1);
@@ -270,15 +268,12 @@ const playOne = () => {
             }
             return makeQuestion(rl, `${quiz.question}? `)
             .then(a => {
-                return {usuario: a, resp: quiz.answer};
+                return {preg: a, resp: quiz.answer};
             });
         })
-        .then(check => {
-            let usuario = check.usuario.trim().toLowerCase();
-            let resp = check.resp.trim().toLowerCase();
-
-            if (usuario === resp){
-                score +=1;
+        .then(b => {
+            if (b.preg.trim().toLowerCase() === b.resp.trim().toLowerCase()){
+                score += 1;
                 log(`CORRECTO - LLeva ${score} aciertos.`);
                 if (toBeResolved.length === 0){
                     log('No hay nada más que preguntar.');
@@ -292,10 +287,11 @@ const playOne = () => {
                 log('INCORRECTO.');
                 log(`Fin del juego. Aciertos: ${score}`);
                 log(`${score}`, 'magenta');
+                rl.prompt();
             }
         })
         .catch(Sequelize.ValidationError, error => {
-            errlog('El quiz es erróneo: ');
+            errlog('El quiz es erróneo');
             error.errors.forEach(({message}) => errlog(message));
         })
         .catch(error => {
@@ -316,17 +312,18 @@ const playOne = () => {
     .then(() => {
         return playOne();
     })
+
     .catch(Sequelize.ValidationError, error => {
-        errlog('El quiz es erróneo: ');
-        error.errors.forEach(({message}) => errlog(message));
-    })
-    .catch(error => {
-        errlog(error.message);
-    })
-    .then(() => {
-        rl.prompt();
-    });
-};
+       errorlog('El quiz es erróneo');
+       error.errors.forEach(({message}) => errorlog(message));
+     })
+     .catch(error => {
+       errorlog(error.message);
+     })
+     .then(error => {
+       rl.prompt();
+     });
+   };
 
 /**
  * Muestra los nombres de los autores de la práctica.
