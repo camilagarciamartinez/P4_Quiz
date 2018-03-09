@@ -204,18 +204,23 @@ exports.editCmd = (rl, id) => {
  * @param id Clave del quiz a probar.
  */
 exports.testCmd = (rl, id) => {
-   validateId(id)
+
+    validateId(id)
      .then(id => models.quiz.findById(id))
      .then(quiz => {
        if (!quiz) {
          throw new Error(`No existe un quiz asociado al id=${id}.`);
        }
+
    log(` [${colorize(id,'magenta')}]: ${quiz.question}`);
-  return makeQuestion(rl,'Introduzca la respuesta: ')
-  .then(a => {
-    if(a.toLowerCase().trim() === quiz.answer.toLowerCase()){
+     return makeQuestion(rl,'Introduzca la respuesta: ')
+        .then(a => {
+            resp=quiz.answer.toLowerCase();
+
+    if(a.toLowerCase().trim() === resp ){
       log("Su respuesta es correcta.");
       log("Correcta","green");
+
     }else{
           log("Su respuesta es incorrecta.");
           log("Incorrecta","red");
@@ -223,7 +228,7 @@ exports.testCmd = (rl, id) => {
     });
   })
 .catch(Sequelize.ValidationError,error =>{
-  errorlog('Quiz erroneo: ');
+  errorlog('Quiz no válido: ');
   error.errors.forEach(({message}) => errorlog(message));
 })
 .catch(error => {
@@ -241,52 +246,82 @@ exports.testCmd = (rl, id) => {
  * @param rl Objeto readline usado para implementar el CLI.
  */
 exports.playCmd = rl => {
-   
-    let score = 0;
 
-    let toBeResolved = [];
-    for (var i = model.count() - 1; i >= 0; i--) {
-        toBeResolved[i] = i;
-    }
+const playOne = () => {
+        
+        let rnd = Math.floor(Math.random()*toBeResolved.length);
+        id = toBeResolved[rnd];
 
-
-    const playOne = () => {
-        if (toBeResolved.length===0){
+        if (toBeResolved.length === 0) {
             log('No hay nada más que preguntar.');
-            log(`Fin del juego. Aciertos:  ${score}`);
-            log(score, 'magenta');
-            rl.prompt();
-        } else {
-            
-            let id = toBeResolved.length * Math.random() ;
-            id = Math.floor(id);
-
-            let quiz = model.getByIndex(toBeResolved[id]);
-            toBeResolved.splice(id, 1);
-
-            rl.question(colorize(quiz.question + '?', 'red'), resp => {
-                
-                resp = resp.toLowerCase().trim();
-                answer = quiz.answer.toLowerCase().trim();
-                    if(resp === answer){
-                        score +=1;
-                        log(`CORRECTO - Lleva ${score} aciertos.`);
-                        playOne();
-                    } else {
-                        log('INCORRECTO.');
-                        log(`Fin del juego. Aciertos: ${score}`);
-                        log(score, 'magenta');
-                        rl.prompt();
-                    }
-            });
-
-
+            log(`Fin del juego. Aciertos: ${score}`);
+            log(`${score}`, 'magenta');
+            return;
         }
+
+        toBeResolved.splice(rnd, 1);
+        validateId(id)
+        .then(id => models.quiz.findById(id))
+        .then(quiz => {
+            if (!quiz) {
+                throw new Error(`No existe un quiz asociado al id = ${id}.`);
+            }
+            return makeQuestion(rl, `${quiz.question}? `)
+            .then(a => {
+                return {usuario: a, resp: quiz.answer};
+            });
+        })
+        .then(check => {
+            let usuario = check.usuario.toLowerCase().trim();
+            let resp = check.resp.toLowerCase().trim();
+
+            if (usuario === resp){
+                score +=1;
+                log(`CORRECTO - LLeva ${score} aciertos.`);
+                if (toBeResolved.length === 0){
+                    log('No hay nada más que preguntar.');
+                    log(`Fin del juego. Aciertos: ${score}`);
+                    log(`${score}`, 'magenta');
+                } else {
+                    playOne();
+                }
+
+            } else {
+                log('INCORRECTO.');
+                log(`Fin del juego. Aciertos: ${score}`);
+                log(`${score}`, 'magenta');
+            }
+        })
+        .catch(Sequelize.ValidationError, error => {
+            errlog('El quiz es erróneo: ');
+            error.errors.forEach(({message}) => errlog(message));
+        })
+        .catch(error => {
+            errlog(error.message);
+        })
+        .then(() => {
+            rl.prompt();
+        });
     }
-    playOne();
+
+    models.quiz.findAll()
+    .each(quiz => {
+        toBeResolved.push(quiz.id);
+    })
+    .then(() => {
+        return playOne();
+    })
+    .catch(Sequelize.ValidationError, error => {
+        errlog('El quiz es erróneo: ');
+        error.errors.forEach(({message}) => errlog(message));
+    })
+    .catch(error => {
+        errlog(error.message);
+    })
+    .then(() => {
+        rl.prompt();
+    });
 };
-
-
 
 /**
  * Muestra los nombres de los autores de la práctica.
