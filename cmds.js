@@ -260,7 +260,9 @@ const playOne = () => {
         }
 
         toBeResolved.splice(rnd, 1);
+        
         validateId(id)
+
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
@@ -304,6 +306,9 @@ const playOne = () => {
         });
     }
 
+    let score = 0;
+    let toBeResolved = [];
+    
     models.quiz.findAll()
     .each(quiz => {
         toBeResolved.push(quiz.id);
