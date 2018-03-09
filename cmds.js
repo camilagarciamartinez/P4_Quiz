@@ -274,8 +274,8 @@ const playOne = () => {
             });
         })
         .then(check => {
-            let usuario = check.usuario.toLowerCase().trim();
-            let resp = check.resp.toLowerCase().trim();
+            let usuario = check.usuario.trim().toLowerCase();
+            let resp = check.resp.trim().toLowerCase();
 
             if (usuario === resp){
                 score +=1;
@@ -308,7 +308,7 @@ const playOne = () => {
 
     let score = 0;
     let toBeResolved = [];
-    
+
     models.quiz.findAll()
     .each(quiz => {
         toBeResolved.push(quiz.id);
