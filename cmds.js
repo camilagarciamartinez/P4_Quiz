@@ -291,14 +291,15 @@ let toBeResolved = [];
                 if (!quiz) {
                     throw new Error(`No existe un quiz asociado al id = ${id}.`);
                 } else {
-                    makeQuestion(rl, ` ¿${quiz.question}? `)
+                    makeQuestion(rl, ` ${quiz.question}? `)
                    .then(answer => {
                         if (answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
                             score =+1 ;
                             log(` CORRECTO - LLeva ${score} aciertos.`);
                             if (toBeResolved.length === 0){
-                                log(` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
-                                log(`${score}`, 'magenta');
+                                log('No hay nada más que preguntar.');
+                                log(`Fin del juego. Aciertos:  ${score}`);
+                                log(score, 'magenta');
                                 resolve();
                                 rl.prompt();
 
