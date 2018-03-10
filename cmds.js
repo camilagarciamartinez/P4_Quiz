@@ -291,7 +291,7 @@ let toBeResolved = [];
                 } else {
                     makeQuestion(rl, ` ¿${quiz.question}? `)
                    .then(answer => {
-                        if (answer.trim().toLowerCase() === quiz.answer.trim().toLowerCase()){
+                        if (answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
                             score =+1 ;
                             log(` CORRECTO - LLeva ${score} aciertos.`);
                             if (toBeResolved.length === 0){
@@ -305,10 +305,11 @@ let toBeResolved = [];
                                 rl.prompt();
                             }
                         } else {
-                            log(` INCORRECTO. Fin del juego. Aciertos: ${score}`);
-                            log(`${score}`, 'magenta');
-                            resolve();
-                            rl.prompt();
+                                log('INCORRECTO.');
+                                log(`Fin del juego. Aciertos: ${score}`);
+                                log(score, 'magenta');
+                                resolve();
+                                rl.prompt();
                         }
                     })
                 }
