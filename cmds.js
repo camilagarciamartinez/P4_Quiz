@@ -277,7 +277,9 @@ let toBeResolved = [];
         return new Sequelize.Promise ((resolve, reject) => {
            
             if (toBeResolved.length === 0) {
-                log(` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
+                log('No hay nada más que preguntar.');
+                log(`Fin del juego. Aciertos:  ${score}`);
+                rl.prompt();
                 resolve();
                 rl.prompt();
                 log(`${score}`, 'magenta');
