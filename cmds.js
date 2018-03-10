@@ -297,9 +297,8 @@ let toBeResolved = [];
                             score =+1 ;
                             log(` CORRECTO - LLeva ${score} aciertos.`);
                             if (toBeResolved.length === 0){
-                                log('No hay nada más que preguntar.');
-                                log(`Fin del juego. Aciertos:  ${score}`);
-                                log(score, 'magenta');
+                                log(` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
+                                log(`${score}`, 'magenta');
                                 resolve();
                                 rl.prompt();
 
