@@ -245,85 +245,78 @@ exports.testCmd = (rl, id) => {
  */
 exports.playCmd = rl => {
 
-const playOne = () => {
-        
-        let rnd = Math.floor(Math.random()*toBeResolved.length);
-        id = toBeResolved[rnd];
-
-        if (toBeResolved.length === 0) {
-            log('No hay nada más que preguntar.');
-            log(`Fin del juego. Aciertos: ${score}`);
-            log(`${score}`, 'magenta');
-            rl.prompt();
-        }
-
-        toBeResolved.splice(rnd, 1);
-        
-        validateId(id)
-
-        .then(id => models.quiz.findById(id))
-        .then(quiz => {
-            if (!quiz) {
-                throw new Error(`No existe un quiz asociado al id = ${id}.`);
-            }
-            return makeQuestion(rl, `${quiz.question}? `)
-            .then(a => {
-                return {preg: a, resp: quiz.answer};
-            });
-        })
-        .then(b => {
-            if (b.preg.trim().toLowerCase() === b.resp.trim().toLowerCase()){
-                score += 1;
-                log(`CORRECTO - LLeva ${score} aciertos.`);
-                if (toBeResolved.length === 0){
-                    log('No hay nada más que preguntar.');
-                    log(`Fin del juego. Aciertos: ${score}`);
-                    log(`${score}`, 'magenta');
-                } else {
-                    playOne();
-                }
-
-            } else {
-                log('INCORRECTO.');
-                log(`Fin del juego. Aciertos: ${score}`);
-                log(`${score}`, 'magenta');
-                rl.prompt();
-            }
-        })
-        .catch(Sequelize.ValidationError, error => {
-            errlog('El quiz es erróneo');
-            error.errors.forEach(({message}) => errlog(message));
-        })
-        .catch(error => {
-            errlog(error.message);
-        })
-        .then(() => {
-            rl.prompt();
-        });
-    }
-
-    let score = 0;
-    let toBeResolved = [];
+let score = 0;
+let toBeResolved = [];
 
     models.quiz.findAll()
-    .each(quiz => {
-        toBeResolved.push(quiz.id);
+    .then(quizzes => {
+        return new Sequelize.Promise((resolve, reject) => {
+            toBeResolved = quizzes;
+            resolve();
+            return;
+        })
+        
     })
     .then(() => {
         return playOne();
     })
-
     .catch(Sequelize.ValidationError, error => {
-       errorlog('El quiz es erróneo');
-       error.errors.forEach(({message}) => errorlog(message));
-     })
-     .catch(error => {
-       errorlog(error.message);
-     })
-     .then(error => {
-       rl.prompt();
-     });
-   };
+        errlog('El quiz es erróneo: ');
+        error.errors.forEach(({message}) => errlog(message));
+    })
+    .catch(error => {
+        errlog(error.message);
+    })
+    .then(() => {
+        rl.prompt();
+        return;
+    });
+
+    const playOne = () => {
+
+        return new Sequelize.Promise ((resolve, reject) => {
+           
+            if (toBeResolved.length === 0) {
+                log(` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
+                resolve();
+                rl.prompt();
+                log(`${score}`, 'magenta');
+            
+            } else {
+                let rnd = Math.floor(Math.random()*toBeResolved.length);
+                let quiz = toBeResolved[rnd];
+                toBeResolved.splice(rnd, 1);
+                if (!quiz) {
+                    throw new Error(`No existe un quiz asociado al id = ${id}.`);
+                } else {
+                    makeQuestion(rl, ` ¿${quiz.question}? `)
+                   .then(answer => {
+                        if (answer.trim().toLowerCase() === quiz.answer.trim().toLowerCase()){
+                            score =+1 ;
+                            log(` CORRECTO - LLeva ${score} aciertos.`);
+                            if (toBeResolved.length === 0){
+                                log(` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
+                                log(`${score}`, 'magenta');
+                                resolve();
+                                rl.prompt();
+
+                            } else {
+                                resolve(playOne());
+                                rl.prompt();
+                            }
+                        } else {
+                            log(` INCORRECTO. Fin del juego. Aciertos: ${score}`);
+                            log(`${score}`, 'magenta');
+                            resolve();
+                            rl.prompt();
+                        }
+                    })
+                }
+            }
+        });
+    }
+};
+
 
 /**
  * Muestra los nombres de los autores de la práctica.
