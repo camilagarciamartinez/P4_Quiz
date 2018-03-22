@@ -256,7 +256,7 @@ let toBeResolved = [];
         return playOne();
     })
     .catch(Sequelize.ValidationError, error => {
-        errlog(socket,'El quiz es erróneo: ');
+        errlog('El quiz es erróneo: ');
         error.errors.forEach(({message}) => errlog(socket,message));
     })
     .catch(error => {
@@ -272,9 +272,7 @@ let toBeResolved = [];
         return new Sequelize.Promise ((resolve, reject) => {
            
             if (toBeResolved.length === 0) {
-                log(socket,'No hay nada más que preguntar.');
-                log(socket,`Fin del juego. Aciertos:  ${score}`);
-                rl.prompt();
+                log(socket,`No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
                 resolve();
                 rl.prompt();
                 log(`${score}`, 'magenta');
@@ -290,7 +288,7 @@ let toBeResolved = [];
                    .then(answer => {
                         if (answer.toLowerCase().trim() === quiz.answer.toLowerCase().trim()){
                             score =+1 ;
-                            log(` CORRECTO - LLeva ${score} aciertos.`);
+                            log(socket,` CORRECTO - LLeva ${score} aciertos.`);
                             if (toBeResolved.length === 0){
                                 log(socket,` No hay nada más que preguntar. Fin del juego. Aciertos: ${score}`);
                                 log(socket,`${score}`, 'magenta');
@@ -302,8 +300,7 @@ let toBeResolved = [];
                                 rl.prompt();
                             }
                         } else {
-                                log(socket,'INCORRECTO.');
-                                log(socket,`Fin del juego. Aciertos: ${score}`);
+                                log(socket,`INCORRECTO. Fin del juego. Aciertos: ${score}`);
                                 log(socket,score, 'magenta');
                                 resolve();
                                 rl.prompt();
