@@ -222,7 +222,7 @@ exports.testCmd = (socket, rl, id) => {
 
       } else {
         log(socket, 'Su respuesta es incorrecta.');
-        og(socket, 'Incorrecta', 'red');
+        log(socket, 'Incorrecta', 'red');
         resolve();
         rl.prompt();
       }
