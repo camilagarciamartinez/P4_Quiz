@@ -199,9 +199,8 @@ exports.editCmd = (socket, id, rl) => {
  * @param rl Objeto readline usado para implementar el CLI.
  * @param id Clave del quiz a probar.
  */
-exports.testCmd = (socket, rl, id) => {
-
-    return new Promise ((resolve, reject) => {
+exports.testCmd = (socket, id, rl) => {
+  return new Promise ((resolve, reject) => {
     validateId(id)
     .then(id => models.quiz.findById(id))
     .then(quiz => {
@@ -218,13 +217,12 @@ exports.testCmd = (socket, rl, id) => {
         log(socket, 'Su respuesta es correcta.');
         log(socket, 'Correcta', 'green');
         resolve();
-        rl.prompt();
-
+        return;
       } else {
         log(socket, 'Su respuesta es incorrecta.');
         log(socket, 'Incorrecta', 'red');
         resolve();
-        rl.prompt();
+        return;
       }
     })
     .catch(Sequelize.ValidationError, error => {
