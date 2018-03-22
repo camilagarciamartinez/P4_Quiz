@@ -208,7 +208,7 @@ exports.testCmd = (socket, rl, id) => {
          throw new Error(`No existe un quiz asociado al id=${id}.`);
        }
 
-   log(` [${colorize(id,'magenta')}]: ${quiz.question}`);
+   log(socket,` [${colorize(id,'magenta')}]: ${quiz.question}`);
      return makeQuestion(rl,'Introduzca la respuesta: ')
         .then(a => {
     if(a.toLowerCase().trim() === quiz.answer.toLowerCase()){
@@ -256,7 +256,7 @@ let toBeResolved = [];
         return playOne();
     })
     .catch(Sequelize.ValidationError, error => {
-        errlog('El quiz es erróneo: ');
+        errlog(socket,'El quiz es erróneo: ');
         error.errors.forEach(({message}) => errlog(socket,message));
     })
     .catch(error => {
