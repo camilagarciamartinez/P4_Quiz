@@ -214,12 +214,12 @@ exports.testCmd = (socket, rl, id) => {
       });
     })
     .then(b => {
-      if (b.user.trim().toLowerCase(); === b.real.trim().toLowerCase();){
+      if (b.user.trim().toLowerCase() === b.real.trim().toLowerCase()){
         log(socket, 'Su respuesta es correcta.');
         log(socket, 'Correcta', 'green');
         resolve();
         rl.prompt();
-        
+
       } else {
         log(socket, 'Su respuesta es incorrecta.');
         og(socket, 'Incorrecta', 'red');
