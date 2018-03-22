@@ -214,15 +214,17 @@ exports.testCmd = (socket, id, rl) => {
     })
     .then(b => {
       if (b.user.trim().toLowerCase() === b.real.trim().toLowerCase()){
-        log(socket, 'Su respuesta es correcta.');
-        log(socket, 'Correcta', 'green');
+        log(socket, "Su respuesta es correcta.");
+        log(socket, "Correcta", "green");
         resolve();
-        return;
+        rl.prompt();
+        
       } else {
-        log(socket, 'Su respuesta es incorrecta.');
-        log(socket, 'Incorrecta', 'red');
+        log(socket, "Su respuesta es incorrecta.");
+        log(socket, "Incorrecta", "red");
         resolve();
-        return;
+        rl.prompt();
+        
       }
     })
     .catch(Sequelize.ValidationError, error => {
