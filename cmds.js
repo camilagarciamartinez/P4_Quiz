@@ -200,46 +200,37 @@ exports.editCmd = (socket, id, rl) => {
  * @param id Clave del quiz a probar.
  */
 exports.testCmd = (socket, id, rl) => {
-  return new Promise ((resolve, reject) => {
-    validateId(id)
-    .then(id => models.quiz.findById(id))
-    .then(quiz => {
-      if (!quiz) {
-        throw new Error(`No existe un quiz asociado al id = ${id}.`);
-      }
-      return makeQuestion(rl, ` ¿${quiz.question}? `)
-      .then(a => {
-        return {user: a, real: quiz.answer};
-      });
-    })
-    .then(b => {
-      if (b.user.trim().toLowerCase() === b.real.trim().toLowerCase()){
-        log(socket, "Su respuesta es correcta.");
-        log(socket, "Correcta", "green");
-        resolve();
-        rl.prompt();
-        
-      } else {
-        log(socket, "Su respuesta es incorrecta.");
-        log(socket, "Incorrecta", "red");
-        resolve();
-        rl.prompt();
-        
-      }
-    })
-    .catch(Sequelize.ValidationError, error => {
-      errlog(socket, 'El quiz es erróneo: ');
-      error.errors.forEach(({message}) => errlog(socket, message));
-    })
-    .catch(error => {
-      errlog(socket, error.message);
-    })
-    .then(() => {
-      rl.prompt();
-    });
+ 
+  validateId(id)
+  .then(id => models.quiz.findById(id))
+  .then (quiz => {
+    if (!quiz) {
+      throw new Error(`No existe un quiz asociado al id=${id}.`);
+    }
+    return makeQuestion(rl, `${quiz.question}? `)
+            .then(a => {
+                if (a.toLowerCase().trim() === quiz.answer.toLowerCase().trim()) {
+                    log(socket, "Su respuesta es correcta.");
+                    biglog(socket, 'Correcta', 'green');
+                } else {
+                    log(socket,"Su respuesta es incorrecta.");
+                    biglog(socket, 'Incorrecta', 'red');
+                }
+
+                rl.prompt();
+            });
+  })
+  .catch(Sequelize.ValidationError, error => {
+    errorlog(socket, 'El quiz es erroneo:');
+    error.errors.forEach(({message}) => errorlog(socket, message));
+  })
+  .catch(error => {
+    errorlog(socket, error.message);
+  })
+  .then (() => {
+    rl.prompt();
   });
 };
-
 /**
  * Pregunta todos los quizzes existentes en el modelo en orden aleatorio.
  * Se gana si se contesta a todos satisfactoriamente.
